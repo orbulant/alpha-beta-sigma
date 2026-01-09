@@ -6,23 +6,42 @@ import (
 	"os"
 )
 
-func ReadCSVFile(filePath string) ([][]string, error) {
-	file, err := os.Open(filePath)
+type CSVReader interface {
+	Read(filePath string) ([][]string, error)
+}
 
-	if err != nil {
-		fmt.Println("Unable to open the file.")
-		return nil, err
+type FileCSVReader struct {
+	SkipHeader bool
+	Delimiter  rune
+	Comment    rune
+}
+
+func NewCSVReader(skipHeader bool, delimiter rune, comment rune) *FileCSVReader {
+	return &FileCSVReader{
+		SkipHeader: skipHeader,
+		Delimiter:  delimiter,
+		Comment:    comment,
 	}
+}
 
+func (f *FileCSVReader) Read(filePath string) ([][]string, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open file %s: %w", filePath, err)
+	}
 	defer file.Close()
 
-	// Read the file CSV content
 	reader := csv.NewReader(file)
-	records, err := reader.ReadAll()
+	reader.Comma = f.Delimiter
+	reader.Comment = f.Comment
 
+	records, err := reader.ReadAll()
 	if err != nil {
-		fmt.Println("Unable to read the file.")
-		return nil, err
+		return nil, fmt.Errorf("failed to read CSV: %w", err)
+	}
+
+	if f.SkipHeader && len(records) > 0 {
+		records = records[1:]
 	}
 
 	return records, nil
