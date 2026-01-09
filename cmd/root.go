@@ -11,7 +11,7 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "abs",
+	Use:   "alpha-beta-sigma",
 	Short: "Quantitative analysis for day series data of equities",
 	Long: `Alpha Beta Sigma is a tool for performing quantitative analysis
 on day series data of equities. It provides various statistical measures
