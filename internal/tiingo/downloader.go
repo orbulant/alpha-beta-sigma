@@ -118,6 +118,12 @@ type priceRow struct {
 	SplitFactor float64 `json:"splitFactor"`
 }
 
+// tiingoTicker sanitises a ticker symbol for use in Tiingo API URLs.
+// Tiingo uses BRKB instead of BRK.B — dots are stripped.
+func tiingoTicker(symbol string) string {
+	return strings.ReplaceAll(symbol, ".", "")
+}
+
 // Download fetches the full available daily OHLCV history for a symbol from Tiingo
 // and writes it as JSON to outDir/<SYMBOL>.json.
 // apiKey is required — store it in TIINGO_API_KEY or pass via --api-key.
@@ -127,7 +133,7 @@ func Download(symbol, apiKey, outDir string) (string, error) {
 	}
 
 	today := time.Now().Format("2006-01-02")
-	url := fmt.Sprintf(baseURL, symbol, startDate, today)
+	url := fmt.Sprintf(baseURL, tiingoTicker(symbol), startDate, today)
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
